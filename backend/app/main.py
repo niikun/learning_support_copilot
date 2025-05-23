@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI
-from chat_bot import create_response
+from .chat_bot import create_response
 
 app = FastAPI()
 
