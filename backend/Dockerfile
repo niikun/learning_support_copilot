@@ -20,10 +20,10 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip cache purge
 
 # Copy application code (everything under backend/app)
-COPY ./app ./app
+COPY ./app/* ./
 
 # Expose project root to Python path
 ENV PYTHONPATH=/app
 
 # Start FastAPI with Uvicorn (auto‑reload for dev)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
