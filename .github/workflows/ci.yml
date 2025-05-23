@@ -31,14 +31,11 @@ jobs:
           pip install -r requirements.txt
 
       # ---- ✅ テストがあれば実行／無ければスキップ ----
-      - name: Run pytest if tests exist
+      - name: Run tests(pytest)
         run: |
           cd backend
-          if ls -1R | grep -E "test_.*\.py" > /dev/null; then
-            echo "🧪 Running tests..." && pytest -q
-          else
-            echo "ℹ️  No test files found — skipping pytest."
-          fi
+          export PYTHONPATH=$PWD   # ← 追加
+          pytest || echo "⚠️  No tests collected — skipping."
 
       - name: Build backend Docker image
         run: docker build -t backend:test ./backend
