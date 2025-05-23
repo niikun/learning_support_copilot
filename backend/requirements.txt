@@ -1,0 +1,16 @@
+black
+fastapi
+uvicorn
+pydantic
+transformers
+accelerate
+sentencepiece
+protobuf
+pyngrok
+pylint
+pytest
+nest_asyncio
+python-dotenv
+langchain
+langchain_community
+langchain_openai

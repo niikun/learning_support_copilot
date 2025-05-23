@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./backend # ビルドコンテキストを backend フォルダに変更
+      dockerfile: Dockerfile
+    container_name: langgraph_api
+    volumes:
+      - ./backend/app:/app/app # ホットリロード用にコードをマウント
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+      - LANGSMITH_PROJECT=LangGraphChatbot
+    ports:
+      - "8000:8000"
+    depends_on:
+      - vectordb
+      - redis
+    restart: unless-stopped
+
+  vectordb:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: chroma_db
+    volumes:
+      - chroma_data:/data
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+  redis_data:
