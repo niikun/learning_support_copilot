@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      # ---- ✅ テストがあれば実行／無ければスキップ ----
+      - name: Run pytest if tests exist
+        run: |
+          cd backend
+          if ls -1R | grep -E "test_.*\.py" > /dev/null; then
+            echo "🧪 Running tests..." && pytest -q
+          else
+            echo "ℹ️  No test files found — skipping pytest."
+          fi
+
+      - name: Build backend Docker image
+        run: docker build -t backend:test ./backend
