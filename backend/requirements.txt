@@ -14,3 +14,9 @@ python-dotenv
 langchain
 langchain_community
 langchain_openai
+langgraph 
+langsmith
+langchain-chroma
+unstructured
+pypdf
+nbformat
