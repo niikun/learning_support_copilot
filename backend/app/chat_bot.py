@@ -1,4 +1,4 @@
-"""ChatGPTを使用して質問に答えるためのコード"""
+"""gpt4o-miniを使用して質問に答えるためのコード"""
 
 import os
 from langchain_openai import ChatOpenAI

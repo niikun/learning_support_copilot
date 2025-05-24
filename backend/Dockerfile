@@ -21,6 +21,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # Copy application code (everything under backend/app)
 COPY ./app ./app
+COPY ./data ./data
 
 # Expose project root to Python path
 ENV PYTHONPATH=/app
