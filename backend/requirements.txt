@@ -23,3 +23,8 @@ nbformat
 pypdf
 nbformat
 markdown
+sqlalchemy[asyncio]
+aiosqlite
+pandas 
+sqlalchemy
+matplotlib
