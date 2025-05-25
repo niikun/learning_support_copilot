@@ -17,6 +17,9 @@ langchain_openai
 langgraph 
 langsmith
 langchain-chroma
-unstructured
+pypdf2
+unstructured[markdown]
+nbformat
 pypdf
 nbformat
+markdown
