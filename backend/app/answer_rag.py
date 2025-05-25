@@ -1,4 +1,5 @@
 import os
+import asyncio
 from typing import List, Dict, Any
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema import BaseRetriever, Document
@@ -12,7 +13,7 @@ META_INSTRUCT = (
     "『回答可能』または『回答不可』のどちらか一語だけを出力してください。"
 )
 
-def iterate_rag(question:str,max_cycles:int=3) ->str:
+async def iterate_rag(question:str,max_cycles:int=3) ->str:
     """
     RAGを使用して質問に答える関数
     Args:
@@ -59,32 +60,32 @@ def iterate_rag(question:str,max_cycles:int=3) ->str:
     context = ""  # 初期文脈は空、もしくは事前知識
     for cycle in range(max_cycles):
         # 1) メタ認知フェーズ（RaQ）
-        decision = llm.invoke(
+        decision = (await llm.ainvoke(
             meta_prompt.format_messages(question=question, context=context)
-        ).content.strip()
+        )).content.strip()
         if "回答可能" in decision:
             break
 
         # 2) キーワード抽出
-        keywords = llm.invoke(
+        keywords = (await llm.ainvoke(
             extract_prompt.format_messages(question=question)
-        ).content.strip()
+        )).content.strip()
 
         # 3) 検索フェーズ
-        docs: List[Document] = retriever.invoke(keywords)
+        docs: List[Document] = await retriever.ainvoke(keywords)
         snippets = "\n".join(d.page_content for d in docs[:5])
 
         # 4) 要約フェーズ（pKA）
-        summary = llm.invoke(
+        summary = (await llm.ainvoke(
             summarize_prompt.format_messages(snippets=snippets)
-        ).content.strip()
+        )).content.strip()
 
         # 5) コンテキストに追加
         context += "\n" + summary
 
     # 6) 最終回答フェーズ
-    final_answer = llm.invoke(
+    final_answer = (await llm.ainvoke(
         final_prompt.format_messages(context=context, question=question)
-    ).content.strip()
+    )).content.strip()
 
     return final_answer

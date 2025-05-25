@@ -3,13 +3,23 @@ This module exposes two endpoints:
 - GET /           → ヘルスチェック
 - GET /query/{q}  → チャットボット応答
 """
-
+import asyncio
+from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
+
 from .chat_bot import create_response
-from .dual_rag import iterate_rag
+from .answer_rag import iterate_rag
 from .hint_rag import create_hint_rag
 
 app = FastAPI()
+
+class QuestionRequest(BaseModel):
+    """質問のリクエストモデル"""
+    question: str
+
+class QAResponse(BaseModel):
+    """質問応答のレスポンスモデル"""
+    response: str
 
 
 @app.get("/")
@@ -27,20 +37,20 @@ def chat(query: str):
     response = create_response(text)
     return {"response": response.content}
 
-@app.get("/create_answer/{question}")
-def create_answer(question: str):
+@app.post("/create_answer,response_model=QAResponse)")
+async def create_answer(req : QuestionRequest):
     """質問を受け取り、モデルに渡して応答を取得する"""
-    text = question.strip()
+    text = req.question.strip()
     if not text:
         raise HTTPException(status_code=400, detail="質問は空であってはなりません。")
-    response = iterate_rag(text)
-    return {"response": response}
+    answer = await iterate_rag(text)
+    return {"response": answer}
 
-@app.get("/create_hint/{question}")
-def create_hint(question: str):
+@app.post("/create_hint",response_model=QAResponse)
+async def create_hint(req: QuestionRequest):
     """質問を受け取り、ヒントを生成する"""
-    text = question.strip()
+    text = req.question.strip()
     if not text:
         raise HTTPException(status_code=400, detail="質問は空であってはなりません。")
-    response = create_hint_rag(text)
-    return {"response": response}
+    hint = await create_hint_rag(text)
+    return {"response": hint}
