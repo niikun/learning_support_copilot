@@ -42,12 +42,12 @@ async def create_hint_rag(question:str,max_cycles:int=3) ->str:
 
     extract_prompt = ChatPromptTemplate.from_template(
         "質問: {question}\n"
-        "→ 検索に使うキーワード（名詞や固有表現）を3つ以内で列挙してください。"
+        "→ 検索に使うキーワード（名詞や固有表現）を列挙してください。"
     )
 
     summarize_prompt = ChatPromptTemplate.from_template(
         "検索結果:\n{snippets}\n"
-        "→ 上記を100字以内で要点だけ要約してください。"
+        "→ 上記を要点だけ短く要約してください。"
     )
 
     final_prompt = ChatPromptTemplate.from_template(

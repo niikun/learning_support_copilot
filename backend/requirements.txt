@@ -28,3 +28,4 @@ aiosqlite
 pandas 
 sqlalchemy
 matplotlib
+python-multipart

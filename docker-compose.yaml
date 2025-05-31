@@ -40,6 +40,21 @@ services:
       - "6379:6379"
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: Copilot_RAG_Frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   chroma_data:
   redis_data:
+
+

@@ -3,9 +3,11 @@ This module exposes two endpoints:
 - GET /           → ヘルスチェック
 - GET /query/{q}  → チャットボット応答
 """
-import asyncio
+import shutil
+from pathlib import Path
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends,UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from fastapi.responses import StreamingResponse, Response, JSONResponse
@@ -22,6 +24,14 @@ from .evaluator import evaluate_answer
 from .db import Evaluation, get_session, init_db
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 必要に応じて制限
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class QuestionRequest(BaseModel):
     """質問のリクエストモデル"""
@@ -52,7 +62,7 @@ def chat(query: str):
     response = create_response(text)
     return {"response": response.content}
 
-@app.post("/create_answer,response_model=QAResponse)")
+@app.post("/create_answer",response_model=QAResponse)
 async def create_answer(
     req : QuestionRequest,
     session: AsyncSession = Depends(get_session),):
@@ -173,3 +183,13 @@ async def daily_quality_from_db(session: AsyncSession = Depends(get_session)):
     plt.close(fig)
     buf.seek(0)
     return Response(buf.getvalue(), media_type="image/png")
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    # 絶対パスで保存（Dockerなら /app/data/ などに合わせる）
+    save_dir = Path("/app/data")
+    save_dir.mkdir(parents=True, exist_ok=True)  # ディレクトリがなければ作成
+    path = save_dir / file.filename
+    with open(path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    return {"filename": file.filename}
