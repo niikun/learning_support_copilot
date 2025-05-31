@@ -14,17 +14,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # Copy dependency spec and install
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
-    && pip cache purge
+COPY requirements.txt ./requirements.txt
 
 # Copy application code (everything under backend/app)
 COPY ./app ./app
 COPY ./data ./data
 
 # Expose project root to Python path
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/app
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && rm -rf ~/.cache/pip
 
 # Start FastAPI with Uvicorn (auto‑reload for dev)
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
